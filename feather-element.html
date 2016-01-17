@@ -1,0 +1,70 @@
+<link rel="import" href="./bower_components/polymer/polymer.html">
+<script type="text/javascript" src="./bower_components/socket.io-client/library/socket.js"></script>
+
+<script>
+    
+    Polymer({
+        is: 'feather-element',
+        
+        properties: {
+            
+            /**
+             * The data interface for binding
+             */
+              
+            data: {
+                type: Object,
+                notify: true
+            },
+            
+            /**
+             * API address to connect
+             */
+            
+            location: {
+                type: String,
+                notify: true,
+                reflectToAttribute: true,
+                observer: '_locationChanged'
+            }
+            
+        },
+        
+        /**
+         * Events
+         */
+         
+        created: function() {
+            this._socketInstance = null; 
+        },
+        
+        
+        /**
+         * Observers
+         */
+         
+         _locationChanged: function() {
+            if (this.properties.location)
+                this._socketInstance = io(this.properties.location);
+            else
+                this._socketInstance = null;
+         },
+         
+         
+         /** 
+          * Functions
+          */
+          
+          /**
+           * Setup socket listening (real time data)
+           */
+          _setupSocket: function() {
+              if (this._socketInstance) {
+                  
+              }
+          }
+        
+        
+        
+    })
+</script>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+        <script type="text/javascript" src="../bower_components/web-component-tester/browser.js"></script>
+        <link rel="import"  href="../bower_components/polymer/polymer.html">
+        <link rel="import" href="../bower_components/test-fixture/test-fixture.html">
+        <link rel="import" href="../feather-element.html">
+    </head>
+    
+    <body>
+        <test-fixture id="test_element">
+            <template>
+                <feather-element/>
+            </template>
+        </test-fixture>
+        
+        
+        <script>
+            
+            suite("<feather-element>", function () {
+                
+                var element;
+                
+                setup (function () {
+                    element = fixture("test_element");    
+                })
+                
+                test('startup behavior', function() {
+                    
+                })
+            })
+        </script>
+    </body>
+</html>

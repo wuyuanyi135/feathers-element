@@ -1,0 +1,17 @@
+{
+  "name": "feather-element",
+  "version": "1.0.0",
+  "description": "polymer wrapper for feather.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io-client": "^1.4.4"
+  },
+  "devDependencies": {
+    "web-component-tester": "^4.1.0"
+  }
+}

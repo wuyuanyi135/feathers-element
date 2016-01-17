@@ -1,0 +1,27 @@
+{
+  "name": "feather-element",
+  "version": "1.0.0",
+  "authors": [
+    "wuyuanyi <ywu647@uwo.ca>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "polymer/Polymer#~1.2.3",
+    "socket.io-client": "~1.4.4"
+  },
+  "devDependencies": {
+    "web-component-tester": "~4.1.0",
+    "seed-element": "PolymerElements/seed-element#~1.0.7"
+  }
+}
