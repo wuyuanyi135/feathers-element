@@ -2,7 +2,7 @@
   "name": "feather-element",
   "version": "1.0.0",
   "authors": [
-    "wuyuanyi <ywu647@uwo.ca>"
+    "wuyuanyi <wuyuanyi135@gmail.com>"
   ],
   "description": "",
   "main": "",
@@ -17,7 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "polymer/Polymer#~1.2.3",
+    "polymer": "polymer/Polymer#~1.2.4",
     "socket.io-client": "~1.4.4"
   },
   "devDependencies": {
