@@ -1,0 +1,224 @@
+<link rel="import" href="./bower_components/polymer/polymer.html">
+<script type="text/javascript" src="bower_components/socket.io-client/socket.io.js"></script>
+<script type="text/javascript" src="Data.js"></script>
+<script>
+  Polymer({
+    is: 'feathers-element',
+
+    properties: {
+
+      /**
+       * The data interface for binding. Use polymer array mutation functions rather than the native operations
+       */
+      data: {
+        type: Array,
+        value: function() {
+          return []
+        },
+        notify: true
+      },
+
+      /**
+       * Server address to connect
+       */
+      url: {
+        type: String,
+        value: '/',
+        reflectToAttribute: true,
+      },
+
+      /**
+       * Service API path. e.g. service="api/user"
+       */
+      service: {
+        type: String,
+        notify: true,
+        reflectToAttribute: true
+      },
+
+      /**
+       * unique key in the retrieved object
+       */
+      key: {
+        type: String,
+        reflectToAttribute: true
+      }
+
+    },
+
+    /**
+     * Events
+     */
+
+    created: function() {
+      this._socket = io();
+    },
+
+    /**
+     * Observers
+     */
+    observers: [
+      '_urlChangeHandler(url)',
+      '_dataUpdatedHandler(data.*)',
+      '_dataCreatedOrRemovedHandler(data.splices)'
+    ],
+
+
+    _urlChangeHandler: function(url) {
+      this._socket.connect('url');
+    },
+
+    _dataUpdatedHandler: function(data) {
+      // When using this.set, if the index is greather than the length. the observer will not be triggered
+      
+      console.log("updated",JSON.parse(JSON.stringify(data)));
+      if (data.path == "data.") {
+        console.error("data.path is not available. Did you use this.set to create new element?");
+        return;
+      }
+      if (data.path == "data.splices") {
+        // created or removed
+        var indexSplices = data.value.indexSplices;
+        this._localCreatedOrRemovedObserver(null, indexSplices);
+        
+      }
+    },
+    
+    _dataCreatedOrRemovedHandler: function (data) {
+      console.log("created or removed", data)
+      //not necessary!!!!!
+    },
+
+    /**
+     * CRUD
+     */
+    find: function(param, cb) {
+      this._socket.emit(this.service + "::find", param, cb);
+    },
+
+    get: function(id, param, cb) {
+      this._socket.emit(this.service + "::get", id, param, cb);
+    },
+
+    create: function(param, cb) {
+      this._socket.emit(this.service + "::create", param, cb);
+    },
+
+    remove: function(id, param, cb) {
+      this._socket.emit(this.service + "::remove", id, param, cb);
+    },
+
+    update: function(id, param, cb) {
+      this._socket.emit(this.service + "::update", id, param, cb);
+    },
+
+    patch: function(id, param, cb) {
+      this._socket.emit(this.service + "::patch", id, param, cb);
+    },
+
+    /**
+     * handlers 
+     **/
+
+    /**
+     * local observer
+     */
+    _localCreatedOrRemovedObserver: function(keySplices, indexSplices) {
+      console.log(keySplices, indexSplices);
+      
+      var diff = indexSplices[0];
+      if (!diff.addedCount) {
+        // removed
+        var removed = diff.removed;
+        for (var i = 0; i < removed.length; i++) {
+          this.remove(removed[i][this.key], function(err, doc) {
+              if (err) {
+                this.fire('push-error', err);
+                return;
+              }
+                this.fire('push-removed', doc);
+          });
+        }
+      } 
+      else {
+        // created
+        var index = diff.index;
+        var addedCount = diff.addedCount;
+        var i;
+        for (i = 0; i < addedCount; i++) {
+          this.create(this.data[index + i],function(err,doc) {
+            if (err) {
+              this.fire('push-error',err);
+              return ;
+            }
+            // assign the primary key to local object
+            if (doc[this.key]) {
+              // TODO: mask the event in update observer where the primary key updated.
+              this.set('data.' + i + '.' + this.key, doc[this.key]); 
+            }
+            this.fire('push-created',doc);
+          });
+        }
+      }
+    },
+
+  /**
+   * push handlers
+   */
+
+  /**
+   * Default handler when new item is created
+   **/
+  _createdHandler: function(err, doc) {
+    if (err) {
+      this.fire('push-error', err);
+      return;
+    }
+
+    this.push('data', doc);
+  },
+
+  /**
+   * Default handler for updated and patched
+   **/
+  _updatedHandler: function(err, doc) {
+    if (err) {
+      this.fire('push-error', err);
+      return;
+    }
+
+    for (var i = 0; i < this.data.length; i++) {
+      if (this.data[i][this.key] == doc[this.key]) {
+        this.data[i] = doc;
+        return; // only replace the first found
+      }
+    }
+
+    // nothing found, need add to local?
+  },
+
+  _removedHandler: function(err, doc) {
+    if (err) {
+      this.fire('push-error', err);
+      return;
+    }
+
+    for (var i = 0; i < this.data.length; i++) {
+      if (this.data[i][this.key] == doc[this.key]) {
+        this.splice('data', i, 1);
+      }
+    }
+  }
+
+
+
+
+  /**
+   * Before
+   * @event feathers-before
+   * @param
+   */
+
+  /* to share connection, pass in _socket */
+  })
+</script>

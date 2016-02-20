@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+
+  <meta name="description" content="Simple element usage">
+  
+  <!--<base href="https://polygit.org/components/">-->
+  
+  <script href="../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+  <link href="../bower_components/polymer/polymer.html" rel="import">
+  
+</head>
+<body>
+
+  <x-custom></x-custom>
+  
+  <dom-module id="x-custom">
+    <template>
+      <p>Hello {{myName}}</p>
+    </template>
+    
+    <script>
+      
+    Polymer({
+    
+      is: 'x-custom',
+    
+      properties: {
+    users: {
+      type: Array,
+      value: function() {
+        return [];
+      }
+    }
+      },
+    
+      observers: [
+    'usersAddedOrRemoved(users.splices)'
+      ],
+    
+      usersAddedOrRemoved: function(changeRecord) {
+    // console.log("changeRecord is:", changeRecord);
+    if(changeRecord){
+      console.log(changeRecord.indexSplices, changeRecord.keySplices)
+    }
+      return;
+      // The next line would cause error
+      },
+    
+      addUser: function() {
+    this.push('users', {name: "Jack Aubrey"});
+      },
+      
+      attached: function(){
+    var that = this;
+    // UNCOMMENTING THIS MAKES THE SECOND CALL WORK
+    // Polymer.Collection.get(this.users);
+    console.log("users:", this.users);
+    setTimeout( function(){
+      console.log("Adding a user to ", that.users);
+      that.addUser();
+    }, 2000);
+      }
+    
+      
+    });
+    
+      
+    </script>
+    
+  </dom-module>
+   
+ </body>
+</html>
