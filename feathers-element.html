@@ -57,22 +57,22 @@ To test the demo, run `node index.js` to start the API server.
       query: {
         type: Object,
         notify: true,
-        value: {}, 
+        value: {},
         reflectToAttribute: true
       },
 
 
-      /**
-       * number of items in data. 
-       * 0: unlimited;
-       * positive number: limit to first result;
-       * negative number: limit to last result;
-       **/
-      limit: {
-        type: Number,
-        value: 0,
-        reflectToAttribute: true,
-      }
+      // /**
+      // * number of items in data. 
+      // * 0: unlimited;
+      // * positive number: limit to first result;
+      // * negative number: limit to last result;
+      // **/
+      // limit: {
+      //   type: Number,
+      //   value: 0,
+      //   reflectToAttribute: true,
+      // }
     },
 
     /**
@@ -81,6 +81,11 @@ To test the demo, run `node index.js` to start the API server.
 
     created: function() {
       this._socket = io();
+    },
+    
+    attached: function() {
+      // observer is not guaranteed run before ready 
+      this.startQuery();
     },
 
     /**
@@ -100,7 +105,10 @@ To test the demo, run `node index.js` to start the API server.
     },
 
     _queryChangeObserver: function(query) {
-      debugger;
+      if (!this.isAttached) {
+        return;
+      }     
+    
       if (typeof query == "string") {
         if (query == "") {
           query = {};
@@ -242,14 +250,13 @@ To test the demo, run `node index.js` to start the API server.
         return;
       }
 
-    },
-
+    }
     /**
-     * Before
-     * @event feathers-before
-     * @param
+     * Triggered when socket.io communication raises an error.
+     * 
+     * @event error
+     * @param {object} error object
      */
 
-    /* to share connection, pass in _socket */
   })
 </script>
