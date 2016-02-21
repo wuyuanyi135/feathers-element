@@ -20,7 +20,7 @@
                         <input type="button" on-click="modifyMe" value="Edit"/>
                     </div>
                 </template>
-                <feathers-element id="element" url="/" data="{{data}}" service="api/memory"></feathers-element>
+                <feathers-element id="element" url="/" data="{{data}}" service="api/memory" on-error="errorHandler"></feathers-element>
             </template>
             <script>
                 
@@ -39,6 +39,10 @@
                         var newData = prompt("Input new value", e.model.item.data);
                         console.log("Changing value to", newData);
                         this.$.element.update(e.model.item, {'data': newData});
+                    },
+                    
+                    errorHandler: function (e) {
+                        console.log("error:",e);
                     }
                 })
             </script>
