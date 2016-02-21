@@ -4,7 +4,7 @@
   "authors": [
     "wuyuanyi <wuyuanyi135@gmail.com>"
   ],
-  "description": "",
+  "description": "feathers.js polymer element",
   "main": "",
   "moduleType": [],
   "repository": "https://github.com/wuyuanyi135/feathers-element",
@@ -19,11 +19,11 @@
   ],
   "dependencies": {
     "polymer": "polymer/Polymer#~1.2.4",
-    "socket.io-client": "~1.4.4",
-    "iron-component-page": "PolymerElements/iron-component-page#~1.1.4"
+    "socket.io-client": "~1.4.4"
   },
   "devDependencies": {
     "web-component-tester": "~4.1.0",
-    "seed-element": "PolymerElements/seed-element#~1.0.7"
+    "seed-element": "PolymerElements/seed-element#~1.0.7",
+    "iron-component-page": "PolymerElements/iron-component-page#~1.1.4"
   }
 }
