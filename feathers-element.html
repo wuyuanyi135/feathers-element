@@ -57,6 +57,7 @@ To test the demo, run `node index.js` to start the API server.
       query: {
         type: Object,
         notify: true,
+        value: {}, 
         reflectToAttribute: true
       },
 
@@ -99,8 +100,18 @@ To test the demo, run `node index.js` to start the API server.
     },
 
     _queryChangeObserver: function(query) {
+      debugger;
       if (typeof query == "string") {
-        query = JSON.parse(query);
+        if (query == "") {
+          query = {};
+        }
+        else {
+          try {
+            query = JSON.parse(query);
+          } catch (e) {
+            throw new Error ("Can not parse query string " + query);
+          }
+        }
       }
       this._findCRUD(query, this._queryCallback.bind(this));
     },
