@@ -12,13 +12,34 @@
     <body>
         <dom-module id="feathers-demo">
             <template>
-                
-                <feathers-element></feathers-element>
+                <input type="button" on-click="addOne" value="Add One"/>
+                <template is="dom-repeat" items="{{data}}">
+                    <div>
+                        ID: [[item.id]] : [[item.data]] 
+                        <input type="button" on-click="removeMe" value="Remove" />
+                        <input type="button" on-click="modifyMe" value="Edit"/>
+                    </div>
+                </template>
+                <feathers-element id="element" url="/" query='{"$limit":10}' data="{{data}}" service="api/memory"></feathers-element>
             </template>
             <script>
                 
                 Polymer({
-                    is: "feathers-demo"
+                    is: "feathers-demo",
+                    addOne: function () {
+                        var data = {data:Math.random()};
+                        console.log("Creating:" + data);
+                        this.$.element.add(data);
+                    },
+                    removeMe: function (e) {
+                        console.log("Deleting:", e.model.item);
+                        this.$.element.remove(e.model.item);
+                    },
+                    modifyMe: function (e) {
+                        var newData = prompt("Input new value", e.model.item.data);
+                        console.log("Changing value to", newData);
+                        this.$.element.update(e.model.item, {'data': newData});
+                    }
                 })
             </script>
         </dom-module>

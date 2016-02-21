@@ -1,6 +1,11 @@
 <link rel="import" href="./bower_components/polymer/polymer.html">
 <script type="text/javascript" src="bower_components/socket.io-client/socket.io.js"></script>
-<script type="text/javascript" src="Data.js"></script>
+<!--
+`feathers-element` is a polymer client for [feathers.js](http://feathersjs.com/).
+To test the demo, run `node index.js` to start the API server.
+@demo demo/index.html
+-->
+
 <script>
   Polymer({
     is: 'feathers-element',
@@ -8,13 +13,14 @@
     properties: {
 
       /**
-       * The data interface for binding. Use polymer array mutation functions rather than the native operations
+       * The data interface for binding.
        */
       data: {
         type: Array,
         value: function() {
           return []
         },
+        readOnly: true,
         notify: true
       },
 
@@ -41,9 +47,31 @@
        */
       key: {
         type: String,
-        reflectToAttribute: true
-      }
+        reflectToAttribute: true,
+        value: "id"
+      },
 
+      /**
+       * query object
+       **/
+      query: {
+        type: Object,
+        notify: true,
+        reflectToAttribute: true
+      },
+
+
+      /**
+       * number of items in data. 
+       * 0: unlimited;
+       * positive number: limit to first result;
+       * negative number: limit to last result;
+       **/
+      limit: {
+        type: Number,
+        value: 0,
+        reflectToAttribute: true,
+      }
     },
 
     /**
@@ -56,169 +84,161 @@
 
     /**
      * Observers
-     */
+     **/
     observers: [
-      '_urlChangeHandler(url)',
-      '_dataUpdatedHandler(data.*)',
-      '_dataCreatedOrRemovedHandler(data.splices)'
+      '_urlChangeObserver(url, service)',
+      '_queryChangeObserver(query)',
     ],
 
-
-    _urlChangeHandler: function(url) {
+    _urlChangeObserver: function(url, service) {
       this._socket.connect('url');
+      this._socket.on(this.service + ' created', this._createdHandler.bind(this));
+      this._socket.on(this.service + ' updated', this._updatedHandler.bind(this));
+      this._socket.on(this.service + ' patched', this._updatedHandler.bind(this));
+      this._socket.on(this.service + ' removed', this._removedHandler.bind(this));
     },
 
-    _dataUpdatedHandler: function(data) {
-      // When using this.set, if the index is greather than the length. the observer will not be triggered
-      
-      console.log("updated",JSON.parse(JSON.stringify(data)));
-      if (data.path == "data.") {
-        console.error("data.path is not available. Did you use this.set to create new element?");
-        return;
+    _queryChangeObserver: function(query) {
+      if (typeof query == "string") {
+        query = JSON.parse(query);
       }
-      if (data.path == "data.splices") {
-        // created or removed
-        var indexSplices = data.value.indexSplices;
-        this._localCreatedOrRemovedObserver(null, indexSplices);
-        
-      }
+      this._findCRUD(query, this._queryCallback.bind(this));
     },
-    
-    _dataCreatedOrRemovedHandler: function (data) {
-      console.log("created or removed", data)
-      //not necessary!!!!!
+
+    /**
+     * Methods
+     */
+
+    /**
+     * add new element. 
+     */
+    add: function(data) {
+      this._createCRUD(data, this._createCallback);
+    },
+
+    /**
+     * Remove the item by providing the reference
+     **/
+    remove: function(item) {
+      var key = item[this.key];
+      this._removeCRUD(key, {} /*, remove callback*/ );
+    },
+
+    /**
+     * Execute query. if query object is not provided, query property will be used
+     */
+    startQuery: function() {
+      var query;
+      if (arguments[0])
+        query = arguments[0];
+      else
+        query = this.query;
+      
+      this._queryChangeObserver(query);
+    },
+
+    /**
+     * Update a item
+     **/
+      update: function(item, data) {
+      var key = item[this.key];
+      this._patchCRUD(key, data /*, update callback */ );
     },
 
     /**
      * CRUD
      */
-    find: function(param, cb) {
+    _findCRUD: function(param, cb) {
       this._socket.emit(this.service + "::find", param, cb);
     },
 
-    get: function(id, param, cb) {
+    _getCRUD: function(id, param, cb) {
       this._socket.emit(this.service + "::get", id, param, cb);
     },
 
-    create: function(param, cb) {
+    _createCRUD: function(param, cb) {
       this._socket.emit(this.service + "::create", param, cb);
     },
 
-    remove: function(id, param, cb) {
+    _removeCRUD: function(id, param, cb) {
       this._socket.emit(this.service + "::remove", id, param, cb);
     },
 
-    update: function(id, param, cb) {
+    _updateCRUD: function(id, param, cb) {
       this._socket.emit(this.service + "::update", id, param, cb);
     },
 
-    patch: function(id, param, cb) {
+    _patchCRUD: function(id, param, cb) {
       this._socket.emit(this.service + "::patch", id, param, cb);
     },
 
-    /**
-     * handlers 
-     **/
 
     /**
-     * local observer
+     * push handlers
      */
-    _localCreatedOrRemovedObserver: function(keySplices, indexSplices) {
-      console.log(keySplices, indexSplices);
-      
-      var diff = indexSplices[0];
-      if (!diff.addedCount) {
-        // removed
-        var removed = diff.removed;
-        for (var i = 0; i < removed.length; i++) {
-          this.remove(removed[i][this.key], function(err, doc) {
-              if (err) {
-                this.fire('push-error', err);
-                return;
-              }
-                this.fire('push-removed', doc);
-          });
+
+    /**
+     * Default handler when new item is created
+     **/
+    _createdHandler: function(doc) {
+      if (doc) {
+        this.push('data', doc);
+      }
+    },
+
+    /**
+     * Default handler for updated and patched
+     **/
+    _updatedHandler: function(doc) {
+      //updatedFilter
+      for (var i = 0; i < this.data.length; i++) {
+        if (this.data[i][this.key] == doc[this.key]) {
+          this.set('data.' + i, doc);
+          return; // only replace the first found
         }
-      } 
-      else {
-        // created
-        var index = diff.index;
-        var addedCount = diff.addedCount;
-        var i;
-        for (i = 0; i < addedCount; i++) {
-          this.create(this.data[index + i],function(err,doc) {
-            if (err) {
-              this.fire('push-error',err);
-              return ;
-            }
-            // assign the primary key to local object
-            if (doc[this.key]) {
-              // TODO: mask the event in update observer where the primary key updated.
-              this.set('data.' + i + '.' + this.key, doc[this.key]); 
-            }
-            this.fire('push-created',doc);
-          });
+      }
+
+      // nothing found, need add to local?
+    },
+
+    _removedHandler: function(doc) {
+      for (var i = 0; i < this.data.length; i++) {
+        if (this.data[i][this.key] == doc[this.key]) {
+          this.splice('data', i, 1);
         }
       }
     },
 
-  /**
-   * push handlers
-   */
+    /**
+     * default handlers
+     */
 
-  /**
-   * Default handler when new item is created
-   **/
-  _createdHandler: function(err, doc) {
-    if (err) {
-      this.fire('push-error', err);
-      return;
-    }
-
-    this.push('data', doc);
-  },
-
-  /**
-   * Default handler for updated and patched
-   **/
-  _updatedHandler: function(err, doc) {
-    if (err) {
-      this.fire('push-error', err);
-      return;
-    }
-
-    for (var i = 0; i < this.data.length; i++) {
-      if (this.data[i][this.key] == doc[this.key]) {
-        this.data[i] = doc;
-        return; // only replace the first found
+    /**
+     * Callback function of query
+     */
+    _queryCallback: function(err, doc) {
+      if (err) {
+        this.fire('error', err);
+        return;
       }
-    }
+      // queryFilterCallback
+      this._setData(doc);
+    },
 
-    // nothing found, need add to local?
-  },
-
-  _removedHandler: function(err, doc) {
-    if (err) {
-      this.fire('push-error', err);
-      return;
-    }
-
-    for (var i = 0; i < this.data.length; i++) {
-      if (this.data[i][this.key] == doc[this.key]) {
-        this.splice('data', i, 1);
+    _createCallback: function(err, doc) {
+      if (err) {
+        this.fire('error', err);
+        return;
       }
-    }
-  }
 
+    },
 
+    /**
+     * Before
+     * @event feathers-before
+     * @param
+     */
 
-
-  /**
-   * Before
-   * @event feathers-before
-   * @param
-   */
-
-  /* to share connection, pass in _socket */
+    /* to share connection, pass in _socket */
   })
 </script>
