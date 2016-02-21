@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "socket.io-client": "^1.4.4"
   },
   "devDependencies": {
     "body-parser": "^1.15.0",
