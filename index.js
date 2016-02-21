@@ -11,8 +11,8 @@ var app = feathers()
     .use(bodyParser.urlencoded({extended: true}))
     
 
-app.use(feathers.static(__dirname));
-
+app.use('/components/feathers-element', feathers.static(__dirname));
+app.use('/components', feathers.static(__dirname + "/bower_components"));
 app.use('/api/memory',memory());
 
 app.listen(8080);
