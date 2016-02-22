@@ -1,54 +1,60 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>feathers-element</title>
-        
-        <script type="text/javascript" src="../../webcomponentsjs/webcomponents-lite.js"></script>
-        <link rel="import" href="../../polymer/polymer.html">
-        <link rel="import" href="../feathers-element.html">
-        
-    </head>
-    
-    <body>
-        <dom-module id="feathers-demo">
-            <template>
-                <input type="button" on-click="addOne" value="Add One"/>
-                <template is="dom-repeat" items="{{data}}">
-                    <div>
-                        ID: [[item.id]] : [[item.data]] 
-                        <input type="button" on-click="removeMe" value="Remove" />
-                        <input type="button" on-click="modifyMe" value="Edit"/>
-                    </div>
-                </template>
-                <feathers-element id="element" url="/" data="{{data}}" service="api/memory" on-error="errorHandler"></feathers-element>
+
+<head>
+    <title>feathers-element</title>
+
+    <script type="text/javascript" src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../polymer/polymer.html">
+    <link rel="import" href="../feathers-element.html">
+
+</head>
+
+<body>
+    <dom-module id="feathers-demo">
+        <template>
+            <input type="button" on-click="addOne" value="Add One" />
+            <template is="dom-repeat" items="{{data}}">
+                <div>
+                    ID: [[item.id]] : [[item.data]]
+                    <input type="button" on-click="removeMe" value="Remove" />
+                    <input type="button" on-click="modifyMe" value="Edit" />
+                </div>
             </template>
-            <script>
-                
+            <feathers-element id="element" url="/" data="{{data}}" service="api/memory" on-error="errorHandler"></feathers-element>
+        </template>
+        <script>
+            HTMLImports.whenReady(function() {
                 Polymer({
                     is: "feathers-demo",
-                    addOne: function () {
-                        var data = {data:Math.random()};
+                    addOne: function() {
+                        var data = {
+                            data: Math.random()
+                        };
                         console.log("Creating:" + data);
                         this.$.element.add(data);
                     },
-                    removeMe: function (e) {
+                    removeMe: function(e) {
                         console.log("Deleting:", e.model.item);
                         this.$.element.remove(e.model.item);
                     },
-                    modifyMe: function (e) {
+                    modifyMe: function(e) {
                         var newData = prompt("Input new value", e.model.item.data);
                         console.log("Changing value to", newData);
-                        this.$.element.update(e.model.item, {'data': newData});
+                        this.$.element.update(e.model.item, {
+                            'data': newData
+                        });
                     },
-                    
-                    errorHandler: function (e) {
-                        console.log("error:",e);
+
+                    errorHandler: function(e) {
+                        console.log("error:", e);
                     }
                 })
-            </script>
-        </dom-module>
+            })
+        </script>
+    </dom-module>
+    <feathers-demo></feathers-demo>
 
-        <feathers-demo></feathers-demo>
-        
-    </body>
+</body>
+
 </html>
