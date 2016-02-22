@@ -10,7 +10,7 @@
   "repository": "https://github.com/wuyuanyi135/feathers-element",
   "license": "MIT",
   "homepage": "",
-  "keywords": ["web-component"],
+  "keywords": ["web-components"],
   "ignore": [
     "**/.*",
     "node_modules",
