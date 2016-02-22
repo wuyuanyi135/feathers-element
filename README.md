@@ -5,6 +5,9 @@ A polymer element to sync data with [feathers.js](http://feathersjs.com/) server
 bower install --save wuyuanyi135/feathers-element
 ```
 # Demo
+[API and Demo](https://feathers-element.mybluemix.net/components/feathers-element/)
+
+
 ```
 git clone https://github.com/wuyuanyi135/feathers-element
 npm install 
